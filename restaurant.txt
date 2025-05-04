@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ресторани</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background-color: #f9fafb; color: #1e293b; line-height: 1.6; }
+    .restaurants-container { padding: 2rem 1rem; max-width: 90%; margin: 0 auto; }
+    .restaurant-list { display: flex; flex-direction: column; gap: 1.5rem; }
+    .restaurant-card { background: linear-gradient(145deg, #ffffff, #f1f5f9); padding: 1.5rem; border-radius: 1rem; box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
+    .restaurant-name { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .menu-item { margin: 0.5rem 0; font-size: 1rem; }
+    @media (max-width: 768px) { .restaurants-container { padding: 1rem 0.5rem; } .restaurant-name { font-size: 1.1rem; } .menu-item { font-size: 0.9rem; } }
+    .btn { padding: 0.75rem 1.5rem; border-radius: 2rem; font-weight: 600; font-size: 0.9rem; color: white; border: none; cursor: pointer; transition: transform 0.3s ease; box-shadow: 0 3px 10px rgba(0,0,0,0.2); touch-action: manipulation; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .btn-back { background: linear-gradient(135deg, #6b7280, #4b5563); display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .btn-back:hover { background: linear-gradient(135deg, #4b5563, #374151); }
+    .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .btn-primary:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+    @media (max-width: 768px) { .btn { padding: 0.6rem 1.2rem; font-size: 0.8rem; } .btn-back { padding: 0.4rem 0.8rem; font-size: 0.8rem; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.22.9/babel.min.js"></script>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const API_URL = 'http://localhost:3000'; // Змініть на URL вашого хостингу після розгортання
+
+    const Restaurants = () => {
+      const [user, setUser] = useState(null);
+      const [restaurants, setRestaurants] = useState([]);
+
+      useEffect(() => {
+        const fetchData = async () => {
+          const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+          if (!currentUser.id) {
+            window.location.href = 'index.html';
+            return;
+          }
+          setUser(currentUser);
+
+          const response = await fetch(`${API_URL}/restaurants`);
+          const data = await response.json();
+          setRestaurants(data);
+        };
+        fetchData();
+      }, []);
+
+      if (!user) return <div>Завантаження...</div>;
+
+      return (
+        <div className="restaurants-container">
+          <button onClick={() => window.location.href = 'index.html#profile'} className="btn btn-back">← Назад</button>
+          <h1>Ресторани</h1>
+          <div className="restaurant-list">
+            {restaurants.map(restaurant => (
+              <div key={restaurant.id} className="restaurant-card">
+                <h2 className="restaurant-name">{restaurant.name}</h2>
+                <ul>
+                  {restaurant.menu.map(item => (
+                    <li key={item.id} className="menu-item">{item.name} - {item.price} грн ({item.description})</li>
+                  ))}
+                </ul>
+                {user.role === 'restaurant' && user.id === restaurant.owner && (
+                  <a href="index.html#profile" className="btn btn-primary">Редагувати меню</a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Restaurants />);
+  </script>
+</body>
+</html>

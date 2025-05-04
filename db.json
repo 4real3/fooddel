@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "id": "1746350768648",
+      "username": "pedro",
+      "password": "pedro",
+      "role": "user"
+    }
+  ],
+  "restaurants": [],
+  "orders": [],
+  "couriers": []
+}
